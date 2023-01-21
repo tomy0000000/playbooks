@@ -1,0 +1,79 @@
+# https://docs.docker.com/engine/install/ubuntu/
+---
+- hosts: all
+  tasks:
+    # Set up the repository
+    - name: Install required system packages
+      become: true
+      apt:
+        pkg:
+          - ca-certificates
+          - gnupg
+        state: latest
+        update_cache: true
+
+    - name: Add Docker GPG apt Key
+      become: true
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      become: true
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    # Install Docker
+    - name: Install Docker
+      become: true
+      apt:
+        pkg:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: latest
+        update_cache: true
+
+    # Add user to docker group
+    - name: Adding user '{{ ansible_user }}' to group docker
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    # Enable docker service restart on boot
+    - name: Enable service docker and ensure it is not masked
+      ansible.builtin.systemd:
+        name: docker
+        enabled: yes
+        masked: no
+
+    - name: Enable service containerd and ensure it is not masked
+      ansible.builtin.systemd:
+        name: containerd
+        enabled: yes
+        masked: no
+
+    # Install docker module for Python
+    - name: Install Docker Module for Python
+      pip:
+        name:
+          - docker
+          - docker-compose
+
+    # Save docker version
+    - name: Save docker version
+      shell: docker version --format '{{ '{{' }}.Server.Version{{ '}}' }}'
+      register: docker_version
+
+    # Save docker compose version
+    - name: Save docker compose version
+      shell: docker compose version --short
+      register: docker_compose_version
+
+    # Output versions
+    - name: Output versions
+      debug:
+        msg: "Docker version: {{ docker_version.stdout }}    Docker Compose version: {{ docker_compose_version.stdout }}"

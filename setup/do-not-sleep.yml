@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Mask sleep.target
+      ansible.builtin.systemd:
+        name: sleep.target
+        masked: true
+
+    - name: Mask suspend.target
+      ansible.builtin.systemd:
+        name: suspend.target
+        masked: true
+
+    - name: Mask hibernate.target
+      ansible.builtin.systemd:
+        name: hibernate.target
+        masked: true
+
+    - name: Mask hybrid-sleep.target
+      ansible.builtin.systemd:
+        name: hybrid-sleep.target
+        masked: true
