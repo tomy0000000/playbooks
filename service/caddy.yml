@@ -6,7 +6,7 @@
 
   tasks:
     - name: Create service directory
-      ansible.builtin.file:
+      file:
         path: "{{ service_dir }}"
         state: directory
 
@@ -14,21 +14,31 @@
       community.docker.docker_network:
         name: caddy
 
+    - name: Check if Caddyfile exists
+      stat:
+        path: "{{ service_dir }}/Caddyfile"
+      register: caddyfile
+
+    - name: Create Caddyfile if not exists
+      when: not caddyfile.stat.exists
+      copy:
+        dest: "{{ service_dir }}/Caddyfile"
+        content: ":80 {\n    root * /usr/share/caddy\n    file_server\n}"
+
     - name: Create docker-compose.yml
       copy:
         dest: "{{ service_dir }}/docker-compose.yml"
         content: |
           services:
             caddy:
-              image: caddy:latest
-              restart: unless-stopped
+              image: tomy0000000/caddy-cloudflare:latest
               ports:
                 - "80:80"
-                - "444:443"
-                - "444:443/udp"
+                - "443:443"
+              restart: always
               volumes:
+                - ./Caddyfile:/etc/caddy/Caddyfile
                 - caddy_data:/data
-                - caddy_config:/config
 
           networks:
             default:
@@ -37,8 +47,8 @@
 
           volumes:
             caddy_data:
-            caddy_config:
 
     - name: Start services
-      community.docker.docker_compose:
-        project_src: "{{ service_dir }}"
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker-compose up --detach
