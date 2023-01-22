@@ -1,0 +1,6 @@
+---
+- hosts: all
+  tasks:
+    - import_tasks: non-root-user.yml
+      vars:
+        public_key: "https://github.com/tomy0000000.keys"
