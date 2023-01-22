@@ -38,6 +38,7 @@
 
     # Add user to docker group
     - name: Adding user '{{ ansible_user }}' to group docker
+      become: true
       user:
         name: "{{ ansible_user }}"
         groups: docker
@@ -62,6 +63,10 @@
         name:
           - docker
           - docker-compose
+
+    # Relogin to gain access to docker
+    - name: Reset SSH connection
+      meta: reset_connection
 
     # Save docker version
     - name: Save docker version
