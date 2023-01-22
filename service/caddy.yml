@@ -1,0 +1,44 @@
+# https://hub.docker.com/_/caddy
+---
+- hosts: all
+  vars:
+    service_dir: "caddy"
+
+  tasks:
+    - name: Create service directory
+      ansible.builtin.file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    - name: Create 'caddy' network
+      community.docker.docker_network:
+        name: caddy
+
+    - name: Create docker-compose.yml
+      copy:
+        dest: "{{ service_dir }}/docker-compose.yml"
+        content: |
+          services:
+            caddy:
+              image: caddy:latest
+              restart: unless-stopped
+              ports:
+                - "80:80"
+                - "444:443"
+                - "444:443/udp"
+              volumes:
+                - caddy_data:/data
+                - caddy_config:/config
+
+          networks:
+            default:
+              external: true
+              name: "caddy"
+
+          volumes:
+            caddy_data:
+            caddy_config:
+
+    - name: Start services
+      community.docker.docker_compose:
+        project_src: "{{ service_dir }}"
