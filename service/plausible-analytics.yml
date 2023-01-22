@@ -1,0 +1,79 @@
+# https://plausible.io/docs/self-hosting
+---
+- hosts: all
+  vars:
+    service_dir: plausible-analytics
+  vars_prompt:
+    - name: domain
+      prompt: Which domain would you like to use
+      private: false
+
+  tasks:
+    - name: Check if plausible-analytics directory is cloned
+      stat:
+        path: "{{ service_dir }}"
+      register: git_dir
+
+    - name: Clone a repo with separate git directory
+      when: not git_dir.stat.exists
+      git:
+        repo: https://github.com/plausible/hosting
+        dest: "{{ service_dir }}"
+
+    - name: Remove port exposing
+      replace:
+        path: "{{ service_dir }}/docker-compose.yml"
+        regexp: "^\\s+ports:\\n\\s+\\-\\s+\"?8000:8000\"?\\n"
+        replace: ""
+
+    - name: Check BASE_URL is set
+      lineinfile:
+        path: "{{ service_dir }}/plausible-conf.env"
+        state: absent
+        search_string: BASE_URL=replace-me
+      check_mode: true
+      register: base_url_set
+
+    - name: Setup BASE_URL
+      when: base_url_set.found == true
+      lineinfile:
+        path: "{{ service_dir }}/plausible-conf.env"
+        state: present
+        regexp: "^BASE_URL=replace-me"
+        line: "BASE_URL=http://{{ domain }}"
+
+    - name: Check SECRET_KEY_BASE is set
+      lineinfile:
+        path: "{{ service_dir }}/plausible-conf.env"
+        state: absent
+        search_string: SECRET_KEY_BASE=replace-me
+      check_mode: true
+      register: secret_key_base_set
+
+    - name: Generate SECRET_KEY_BASE
+      when: secret_key_base_set.found == true
+      shell: "openssl rand -base64 64 | tr -d '\n'"
+      register: secret_key_base
+
+    - name: Setup SECRET_KEY_BASE
+      when: secret_key_base_set.found == true
+      lineinfile:
+        path: "{{ service_dir }}/plausible-conf.env"
+        state: present
+        regexp: "^SECRET_KEY_BASE=replace-me"
+        line: "SECRET_KEY_BASE={{ secret_key_base.stdout }}"
+
+    - name: Start plausible analytics
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    - name: Add to network
+      import_tasks: ../utils/proxy_network.yml
+      vars:
+        service: "{{ service_dir }}-plausible-1"
+
+    - name: Setup DNS record
+      import_tasks: ../utils/cloudflare_dns.yml
+
+    # TODO: Setup reverse proxy
