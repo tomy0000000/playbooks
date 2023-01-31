@@ -1,0 +1,69 @@
+---
+- hosts: all
+  vars:
+    base_dir: "Developing"
+    project_name: "k-backend"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+
+  tasks:
+    # Create service directory
+    - name: Create service directory
+      file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    # Create docker-compose.yml
+    - name: Create docker-compose.yml
+      copy:
+        dest: "{{ service_dir }}/docker-compose.yml"
+        content: |
+          services:
+            api:
+              command: "uvicorn k_backend.main:app --host 0.0.0.0 --port 8000"
+              depends_on:
+                - "postgres"
+              env_file:
+                - "instance/production.env"
+              image: "tomy0000000/k-backend"
+              volumes:
+                - "./instance:/usr/src/k-backend/instance"
+            postgres:
+              env_file:
+                - "instance/production.env"
+              image: "postgres:15"
+              ports:
+                - "127.0.0.1:5490:5432"
+              volumes:
+                - "data:/var/lib/postgresql/data"
+            backup:
+              depends_on:
+                - "postgres"
+              env_file:
+                - "instance/production.env"
+              environment:
+                - "POSTGRES_BACKUP_DROPBOX_DIR=/Backups/K"
+              image: "tomy0000000/postgres-backup-dropbox:15"
+
+          networks:
+            default:
+              external: true
+              name: "nginx-proxy-manager"
+
+          volumes:
+            data:
+
+    # Create instance directory
+    - name: Create instance directory
+      file:
+        path: "{{ service_dir }}/instance"
+        state: directory
+
+    # TODO: Create production.env
+
+    # Start the service
+    - name: Start services
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    # TODO: Configure Nginx Proxy Manager
