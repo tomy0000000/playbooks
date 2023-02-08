@@ -25,6 +25,7 @@
               env_file:
                 - "instance/production.env"
               image: "tomy0000000/k-backend"
+              restart: always
               volumes:
                 - "./instance:/usr/src/k-backend/instance"
             postgres:
@@ -33,6 +34,7 @@
               image: "postgres:15"
               ports:
                 - "127.0.0.1:5490:5432"
+              restart: always
               volumes:
                 - "data:/var/lib/postgresql/data"
             backup:
@@ -43,6 +45,7 @@
               environment:
                 - "POSTGRES_BACKUP_DROPBOX_DIR=/Backups/K"
               image: "tomy0000000/postgres-backup-dropbox:15"
+              restart: always
 
           networks:
             default:
