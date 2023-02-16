@@ -1,0 +1,26 @@
+---
+- hosts: all
+  vars:
+    base_dir: "Developing"
+    project_name: "portainer-agent"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+
+  tasks:
+    - name: Create service directory
+      file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    - name: Create docker-compose.yml
+      copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+
+    - name: Start services
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    - name: Show portainer host configuration guide
+      debug:
+        msg: "Environment address: {{ ansible_host }}:9001"
