@@ -1,0 +1,8 @@
+- name: Add DNS record to Cloudflare
+  community.general.cloudflare_dns:
+    api_token: "{{ lookup('community.general.onepassword', 'Cloudflare API Token', field='credential') }}"
+    proxied: true
+    record: "{{ domain.split('.')[:-2] }}"
+    type: A
+    value: "{{ ansible_host }}"
+    zone: "{{ domain.split('.')[-2:] | join('.') }}"
