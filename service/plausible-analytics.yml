@@ -4,6 +4,9 @@
   vars:
     service_dir: plausible-analytics
   vars_prompt:
+    - name: "docker_network"
+      prompt: "Enter the name of the docker network to use"
+      default: "caddy"
     - name: domain
       prompt: Which domain would you like to use
       private: false
@@ -63,17 +66,25 @@
         regexp: "^SECRET_KEY_BASE=replace-me"
         line: "SECRET_KEY_BASE={{ secret_key_base.stdout }}"
 
+    - name: Add networks block if docker_network is set
+      when: docker_network is defined
+      blockinfile:
+        path: "{{ service_dir }}/docker-compose.yml"
+        block: |
+          networks:
+            default:
+              external: true
+              name: "{{ docker_network }}"
+
     - name: Start plausible analytics
       command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
 
-    - name: Add to network
-      import_tasks: ../utils/proxy_network.yml
-      vars:
-        service: "{{ service_dir }}-plausible-1"
-
     - name: Setup DNS record
       import_tasks: ../utils/cloudflare_dns.yml
 
     # TODO: Setup reverse proxy
+
+    # TODO: Custom configuration
+    # https://plausible.io/docs/self-hosting-configuration
