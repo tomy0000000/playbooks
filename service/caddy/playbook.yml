@@ -2,7 +2,9 @@
 ---
 - hosts: all
   vars:
-    service_dir: "caddy"
+    base_dir: "Developing"
+    project_name: "caddy"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
 
   tasks:
     - name: Create service directory
@@ -27,28 +29,10 @@
 
     - name: Create docker-compose.yml
       copy:
+        src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
-        content: |
-          services:
-            caddy:
-              image: tomy0000000/caddy-cloudflare:latest
-              ports:
-                - "80:80"
-                - "443:443"
-              restart: always
-              volumes:
-                - ./Caddyfile:/etc/caddy/Caddyfile
-                - caddy_data:/data
-
-          networks:
-            default:
-              external: true
-              name: "caddy"
-
-          volumes:
-            caddy_data:
 
     - name: Start services
       command:
         chdir: "{{ service_dir }}"
-        cmd: docker-compose up --detach
+        cmd: docker compose up --detach

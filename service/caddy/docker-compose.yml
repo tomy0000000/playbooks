@@ -1,0 +1,19 @@
+services:
+  caddy:
+    container_name: caddy
+    image: tomy0000000/caddy-cloudflare:2.6
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - data:/data
+
+networks:
+  default:
+    external: true
+    name: "caddy"
+
+volumes:
+  data:
