@@ -5,7 +5,6 @@
     base_dir: "Developing"
     project_name: "uptime-kuma"
     service_dir: "{{ base_dir }}/{{ project_name }}"
-    onepassword_key_item: "Cloudflare API Token"
   vars_prompt:
     - name: docker_network
       prompt: Which network should Uptime Kuma be connected to
@@ -46,14 +45,7 @@
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
 
-    # Add DNS record to Cloudflare
-    - name: Add DNS record to Cloudflare
-      community.general.cloudflare_dns:
-        api_token: "{{ lookup('community.general.onepassword', '{{ onepassword_key_item }}', field='credential') }}"
-        proxied: true
-        record: "{{ domain.split('.')[0] }}"
-        type: A
-        value: "{{ ansible_host }}"
-        zone: "{{ domain.split('.')[-2:] | join('.') }}"
+    - name: Setup DNS record
+      import_tasks: ../utils/cloudflare_dns.yml
 
     # TODO: Add entry to Caddyfile
