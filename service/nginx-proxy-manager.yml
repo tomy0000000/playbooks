@@ -1,0 +1,46 @@
+---
+- hosts: all
+  vars:
+    service_dir: "Developing/nginx-proxy-manager"
+
+  tasks:
+    # Create service directory
+    - name: Create service directory
+      file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    # Create network
+    - name: Create 'nginx-proxy-manager' network
+      community.docker.docker_network:
+        name: nginx-proxy-manager
+
+    # Create docker-compose.yml
+    - name: Create docker-compose.yml
+      copy:
+        dest: "{{ service_dir }}/docker-compose.yml"
+        content: |
+          version: "3"
+          services:
+            app:
+              image: "jc21/nginx-proxy-manager:latest"
+              restart: "always"
+              ports:
+                - "80:80"
+                - "443:443"
+                - "81:81"
+
+              volumes:
+                - "./data:/data"
+                - "./letsencrypt:/etc/letsencrypt"
+
+          networks:
+            default:
+              external: true
+              name: "nginx-proxy-manager"
+
+    # Start the service
+    - name: Start services
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker-compose up --detach
