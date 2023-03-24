@@ -1,0 +1,7 @@
+# https://github.com/NVIDIA/ansible-role-nvidia-driver
+---
+- hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - nvidia.nvidia_driver
