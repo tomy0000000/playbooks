@@ -4,21 +4,21 @@
 
   tasks:
     - name: Mask sleep.target
-      ansible.builtin.systemd:
+      systemd:
         name: sleep.target
         masked: true
 
     - name: Mask suspend.target
-      ansible.builtin.systemd:
+      systemd:
         name: suspend.target
         masked: true
 
     - name: Mask hibernate.target
-      ansible.builtin.systemd:
+      systemd:
         name: hibernate.target
         masked: true
 
     - name: Mask hybrid-sleep.target
-      ansible.builtin.systemd:
+      systemd:
         name: hybrid-sleep.target
         masked: true

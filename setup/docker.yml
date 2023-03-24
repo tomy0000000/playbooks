@@ -46,13 +46,13 @@
 
     # Enable docker service restart on boot
     - name: Enable service docker and ensure it is not masked
-      ansible.builtin.systemd:
+      systemd:
         name: docker
         enabled: yes
         masked: no
 
     - name: Enable service containerd and ensure it is not masked
-      ansible.builtin.systemd:
+      systemd:
         name: containerd
         enabled: yes
         masked: no
