@@ -32,6 +32,11 @@
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
 
+    - name: Pull images
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+
     - name: Start services
       command:
         chdir: "{{ service_dir }}"

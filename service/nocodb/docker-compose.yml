@@ -1,5 +1,3 @@
-# https://github.com/nocodb/nocodb/blob/develop/docker-compose/pg/docker-compose.yml
-version: '2.1'
 services:
   nocodb:
     container_name: nocodb-app
@@ -24,7 +22,7 @@ services:
       retries: 10
       test: "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""
       timeout: 2s
-    image: postgres
+    image: "postgres:15"
     restart: always
     volumes:
       - "db_data:/var/lib/postgresql/data"

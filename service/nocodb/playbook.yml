@@ -1,3 +1,4 @@
+# https://github.com/nocodb/nocodb/tree/develop#docker-compose
 ---
 - hosts: all
   vars:
@@ -29,6 +30,11 @@
             default:
               external: true
               name: "{{ docker_network }}"
+
+    - name: Pull images
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
 
     - name: Start services
       command:

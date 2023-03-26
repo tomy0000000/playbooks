@@ -60,6 +60,11 @@
       when: not credentials_file.stat.exists
       local_action: file path=1password-credentials.json state=absent
 
+    - name: Pull images
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+
     - name: Start services
       command:
         chdir: "{{ service_dir }}"
