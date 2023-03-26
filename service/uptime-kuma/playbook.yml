@@ -16,29 +16,25 @@
       private: false
 
   tasks:
-    - name: Create uptime-kuma directory
+    - name: Create service directory
       file:
         path: "{{ service_dir }}"
         state: directory
 
     - name: Create docker-compose.yml
       copy:
+        src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
-        content: |
-          services:
-            uptime-kuma:
-              image: louislam/uptime-kuma:1
-              restart: always
-              volumes:
-                - data:/app/data
 
+    - name: Add networks block if docker_network is set
+      when: docker_network is defined
+      blockinfile:
+        path: "{{ service_dir }}/docker-compose.yml"
+        block: |
           networks:
             default:
               external: true
               name: "{{ docker_network }}"
-
-          volumes:
-            data:
 
     - name: Start services
       command:
@@ -46,6 +42,6 @@
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../utils/cloudflare_dns.yml
+      import_tasks: ../../utils/cloudflare_dns_cname.yml
 
     # TODO: Add entry to Caddyfile
