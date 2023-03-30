@@ -87,7 +87,7 @@
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../utils/cloudflare_dns.yml
+      import_tasks: ../utils/cloudflare-dns.yml
 
     # TODO: Setup reverse proxy
 

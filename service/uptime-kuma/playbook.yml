@@ -42,6 +42,6 @@
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../../utils/cloudflare_dns_cname.yml
+      import_tasks: ../../utils/cloudflare-dns-cname.yml
 
     # TODO: Add entry to Caddyfile

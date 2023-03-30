@@ -65,7 +65,7 @@ ansible-playbook -l some-host service/.../playbook.yml
   tasks:
     ...
     - name: Setup DNS record
-      import_tasks: ../utils/cloudflare_dns.yml
+      import_tasks: ../utils/cloudflare-dns.yml
   ```
 
 ## Compose File Rules
