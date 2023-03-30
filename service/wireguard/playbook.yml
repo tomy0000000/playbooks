@@ -1,0 +1,76 @@
+# https://github.com/linuxserver/docker-wireguard
+---
+- hosts: all
+  vars:
+    base_dir: "Developing"
+    project_name: "wireguard"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+  vars_prompt:
+    - name: "docker_network"
+      prompt: "Enter the name of the docker network to use"
+      default: "nginx-proxy-manager"
+    - name: domain
+      prompt: Which domain would you like to use
+      default: "wg.tomy.me"
+      private: false
+    - name: "password"
+      prompt: "Enter the password for the web interface (Only create on first install)"
+      default: '{{ lookup("ansible.builtin.password", "/tmp/passwordfile") }}'
+      private: true
+
+  tasks:
+    - name: Create service directory
+      file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    - name: Check .env file
+      stat:
+        path: "{{ service_dir }}/.env"
+      register: dot_env
+
+    - name: Create .env file
+      copy:
+        dest: "{{ service_dir }}/.env"
+        content: |
+          WG_HOST='{{ ansible_host }}'
+          PASSWORD='{{ password }}'
+          WG_DEFAULT_DNS='1.1.1.1'  # Pi-Hole not working yet
+      when: not dot_env.stat.exists
+
+    - name: Create docker-compose.yml
+      copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+
+    - name: Add networks block if docker_network is set
+      when: docker_network is defined
+      blockinfile:
+        path: "{{ service_dir }}/docker-compose.yml"
+        block: |
+          networks:
+            default:
+              external: true
+              name: "{{ docker_network }}"
+
+    - name: Pull images
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+
+    - name: Start services
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    - name: Setup DNS record
+      import_tasks: ../../utils/cloudflare-dns-cname.yml
+
+    - name: Save to 1Password
+      import_tasks: ../../utils/1password-save-login/tasks.yml
+      when: not dot_env.stat.exists
+      vars:
+        name: "WireGuard Easy"
+        url: "https://{{ domain }}"
+
+    # TODO: Configure Nginx Proxy Manager
