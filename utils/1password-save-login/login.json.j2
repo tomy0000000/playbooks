@@ -1,0 +1,26 @@
+{
+  "title": "{{ name | quote }}",
+  "category": "LOGIN",
+  "urls": [
+    {
+      "primary": true,
+      "href": "{{ url | default | quote }}"  # default to empty string
+    }
+  ],
+  "fields": [
+    {
+      "id": "username",
+      "type": "STRING",
+      "purpose": "USERNAME",
+      "label": "username",
+      "value": "{{ username | default }}"  # default to empty string
+    },
+    {
+      "id": "password",
+      "type": "CONCEALED",
+      "purpose": "PASSWORD",
+      "label": "password",
+      "value": {{ password | quote }}
+    }
+  ]
+}

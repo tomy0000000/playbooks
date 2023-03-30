@@ -1,0 +1,9 @@
+- name: Load and interpolate from template
+  delegate_to: localhost
+  ansible.builtin.set_fact:
+    credentials: "{{ lookup('template', './login.json.j2') }}"
+
+- name: Save credentials to 1Password
+  delegate_to: localhost
+  shell:
+    cmd: "set -o pipefail && echo '{{ credentials | tojson | replace(\"\\\\\", \"\\\\\\\\\") }}' | op item create"
