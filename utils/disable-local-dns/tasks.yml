@@ -1,0 +1,58 @@
+# https://askubuntu.com/a/1170073/1226685
+# https://stackoverflow.com/a/52016887/10325430
+#
+# Remember to add become: true when importing this task
+#
+- name: Stop systemd-resolved
+  systemd:
+    name: systemd-resolved
+    state: stopped
+  register: systemd_resolved_stopped
+
+- name: Disable systemd-resolved
+  systemd:
+    name: systemd-resolved
+    enabled: false
+
+- name: Mask systemd-resolved
+  systemd:
+    name: systemd-resolved
+    masked: true
+
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+  when: systemd_resolved_stopped.changed
+
+- name: Check /etc/resolv.conf
+  copy:
+    src: ./resolv.conf
+    dest: /etc/resolv.conf
+  check_mode: true
+  register: resolv_conf_check
+
+- name: Backup /etc/resolv.conf if needed
+  copy:
+    src: /etc/resolv.conf
+    dest: /etc/resolv.conf.bak
+    remote_src: true
+    force: true
+  when: systemd_resolved_stopped.changed and resolv_conf_check.changed
+
+- name: Update /etc/resolv.conf
+  copy:
+    src: ./resolv.conf
+    dest: /etc/resolv.conf
+    force: true
+  when: systemd_resolved_stopped.changed and resolv_conf_check.changed
+
+- name: Check if Docker is installed
+  command: docker --version
+  register: docker_installed
+  ignore_errors: yes
+
+- name: Restart Docker if installed
+  systemd:
+    name: docker
+    state: restarted
+  when: systemd_resolved_stopped.changed and not docker_installed.failed
