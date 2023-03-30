@@ -1,0 +1,88 @@
+# https://github.com/pi-hole/docker-pi-hole
+---
+- hosts: all
+  vars:
+    base_dir: "Developing"
+    project_name: "pihole"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+  vars_prompt:
+    - name: "docker_network"
+      prompt: "Enter the name of the docker network to use"
+      default: "nginx-proxy-manager"
+    - name: "domain"
+      prompt: "Which domain would you like to use"
+      default: "pihole.tomy.me"
+      private: false
+    - name: "password"
+      prompt: "Enter the password for the pihole web interface (Only create on first install)"
+      default: "{{ lookup('ansible.builtin.password', '/tmp/passwordfile') }}"
+      private: true
+
+  tasks:
+    - name: Disable local DNS # So that port 53 is available
+      become: true
+      import_tasks: ../../utils/disable-local-dns/tasks.yml
+
+    - name: Create service directory
+      file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    - name: Check .env file
+      stat:
+        path: "{{ service_dir }}/.env"
+      register: dot_env
+
+    - name: Create .env file
+      copy:
+        dest: "{{ service_dir }}/.env"
+        content: |
+          WEBPASSWORD='{{ password }}'
+          VIRTUAL_HOST='{{ domain }}'
+      when: not dot_env.stat.exists
+
+    - name: Create docker-compose.yml
+      copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+
+    - name: Add networks block if docker_network is set
+      when: docker_network is defined
+      blockinfile:
+        path: "{{ service_dir }}/docker-compose.yml"
+        block: |
+          networks:
+            default:
+              external: true
+              name: "{{ docker_network }}"
+
+    - name: Pull images
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+
+    - name: Start services
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    - name: Setup DNS record
+      import_tasks: ../../utils/cloudflare_dns_cname.yml
+
+    - name: Add pihole to /etc/resolv.conf
+      become: true
+      lineinfile:
+        path: /etc/resolv.conf
+        firstmatch: true
+        insertbefore: "^nameserver*"
+        line: "nameserver 127.0.0.1"
+
+    - name: Save to 1Password
+      import_tasks: ../../utils/1password-save-login/tasks.yml
+      # when: not dot_env.stat.exists
+      vars:
+        name: "Pi-hole"
+        url: "https://{{ domain }}"
+        username: null
+
+    # TODO: Configure Nginx Proxy Manager
