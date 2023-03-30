@@ -15,7 +15,7 @@
       private: false
     - name: "password"
       prompt: "Enter the password for the pihole web interface (Only create on first install)"
-      default: "{{ lookup('ansible.builtin.password', '/tmp/passwordfile') }}"
+      default: '{{ lookup("ansible.builtin.password", "/tmp/passwordfile") }}'
       private: true
 
   tasks:
@@ -79,10 +79,9 @@
 
     - name: Save to 1Password
       import_tasks: ../../utils/1password-save-login/tasks.yml
-      # when: not dot_env.stat.exists
+      when: not dot_env.stat.exists
       vars:
         name: "Pi-hole"
         url: "https://{{ domain }}"
-        username: null
 
     # TODO: Configure Nginx Proxy Manager

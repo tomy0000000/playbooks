@@ -1,10 +1,10 @@
 {
-  "title": "{{ name | quote }}",
+  "title": "{{ name }}",
   "category": "LOGIN",
   "urls": [
     {
       "primary": true,
-      "href": "{{ url | default | quote }}"  # default to empty string
+      "href": "{{ url | default }}"
     }
   ],
   "fields": [
@@ -13,14 +13,14 @@
       "type": "STRING",
       "purpose": "USERNAME",
       "label": "username",
-      "value": "{{ username | default }}"  # default to empty string
+      "value": "{{ username | default }}"
     },
     {
       "id": "password",
       "type": "CONCEALED",
       "purpose": "PASSWORD",
       "label": "password",
-      "value": {{ password | quote }}
+      "value": "{{ password }}"
     }
   ]
 }
