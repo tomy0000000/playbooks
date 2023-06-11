@@ -1,0 +1,35 @@
+services:
+  kutt:
+    command:
+      [
+        "./wait-for-it.sh",
+        "postgres:5432",
+        "--",
+        "npm",
+        "start"
+      ]
+    container_name: kutt
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - .env
+    image: kutt/kutt:v2.7.4
+
+  redis:
+    container_name: redis
+    image: redis:6.0-alpine
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    container_name: postgres
+    env_file:
+      - .env
+    image: postgres:12-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  postgres_data:

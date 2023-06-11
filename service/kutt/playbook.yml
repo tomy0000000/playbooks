@@ -1,0 +1,96 @@
+# https://github.com/thedevs-network/kutt#docker
+---
+- hosts: all
+  vars:
+    base_dir: "Developing"
+    project_name: "kutt"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+    db_password: "{{ lookup('password', '/tmp/passwordfile') }}"
+    jwt_secret: "{{ lookup('password', '/tmp/passwordfile') }}"
+  vars_prompt:
+    - name: "docker_network"
+      prompt: "Enter the name of the docker network to use"
+      default: "caddy"
+    - name: "domain"
+      prompt: "Which domain would you like to use"
+      default: "kutt.tomy.me"
+      private: false
+
+  tasks:
+    - name: Create service directory
+      file:
+        path: "{{ service_dir }}"
+        state: directory
+
+    - name: Check .env file
+      stat:
+        path: "{{ service_dir }}/.env"
+      register: dot_env
+
+    - name: Create .env file
+      copy:
+        src: .env
+        dest: "{{ service_dir }}/.env"
+      when: not dot_env.stat.exists
+
+    - name: Setup DEFAULT_DOMAIN in .env file
+      lineinfile:
+        path: .env
+        regexp: "^DEFAULT_DOMAIN=$"
+        line: "DEFAULT_DOMAIN={{ domain }}"
+        backrefs: yes
+      when: not dot_env.stat.exists
+
+    - name: Setup POSTGRES_PASSWORD in .env file
+      lineinfile:
+        path: .env
+        regexp: "^POSTGRES_PASSWORD=$"
+        line: "POSTGRES_PASSWORD={{ db_password }}"
+        backrefs: yes
+      when: not dot_env.stat.exists
+
+    - name: Setup DB_PASSWORD in .env file
+      lineinfile:
+        path: .env
+        regexp: "^DB_PASSWORD=$"
+        line: "DB_PASSWORD={{ db_password }}"
+        backrefs: yes
+      when: not dot_env.stat.exists
+
+    - name: Setup JWT_SECRET in .env file
+      lineinfile:
+        path: .env
+        regexp: "^JWT_SECRET=$"
+        line: "JWT_SECRET={{ jwt_secret }}"
+        backrefs: yes
+      when: not dot_env.stat.exists
+
+    - name: Create docker-compose.yml
+      copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+
+    - name: Add networks block if docker_network is set
+      when: docker_network is defined
+      blockinfile:
+        path: "{{ service_dir }}/docker-compose.yml"
+        block: |
+          networks:
+            default:
+              external: true
+              name: "{{ docker_network }}"
+
+    - name: Pull images
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+
+    - name: Start services
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    - name: Setup DNS record
+      import_tasks: ../../utils/cloudflare-dns-cname.yml
+
+    # TODO: Setup reverse proxy
