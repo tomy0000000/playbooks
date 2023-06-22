@@ -6,7 +6,7 @@
   vars_prompt:
     - name: "docker_network"
       prompt: "Enter the name of the docker network to use"
-      default: "caddy"
+      private: false
     - name: domain
       prompt: Which domain would you like to use
       private: false
@@ -87,7 +87,7 @@
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../utils/cloudflare-dns.yml
+      import_tasks: ../../utils/cloudflare-dns-cname.yml
 
     # TODO: Setup reverse proxy
 
