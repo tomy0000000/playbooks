@@ -1,0 +1,13 @@
+---
+- hosts: all
+  tasks:
+    - name: Install packages
+      become: true
+      apt:
+        name:
+          - dnsutils # dig
+          - iputils-ping # ping
+          - whois # whois
+          - dnsutils # nslookup
+        state: latest
+        update_cache: true
