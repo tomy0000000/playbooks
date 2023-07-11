@@ -1,11 +1,12 @@
 # https://docs.docker.com/engine/install/ubuntu/
 ---
 - hosts: all
+  gather_facts: true
   tasks:
     # Set up the repository
     - name: Install required system packages
       become: true
-      apt:
+      ansible.builtin.apt:
         pkg:
           - ca-certificates
           - gnupg
@@ -14,20 +15,22 @@
 
     - name: Add Docker GPG apt Key
       become: true
-      apt_key:
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
+        dest: /etc/apt/trusted.gpg.d/docker.asc
+        mode: "0644"
+        force: true
 
     - name: Add Docker Repository
       become: true
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
         state: present
 
     # Install Docker
     - name: Install Docker
       become: true
-      apt:
+      ansible.builtin.apt:
         pkg:
           - docker-ce
           - docker-ce-cli
@@ -39,46 +42,46 @@
     # Add user to docker group
     - name: Adding user '{{ ansible_user }}' to group docker
       become: true
-      user:
+      ansible.builtin.user:
         name: "{{ ansible_user }}"
         groups: docker
-        append: yes
+        append: true
 
     # Enable docker service restart on boot
     - name: Enable service docker and ensure it is not masked
-      systemd:
+      ansible.builtin.systemd:
         name: docker
-        enabled: yes
-        masked: no
+        enabled: true
+        masked: false
 
     - name: Enable service containerd and ensure it is not masked
-      systemd:
+      ansible.builtin.systemd:
         name: containerd
-        enabled: yes
-        masked: no
+        enabled: true
+        masked: false
 
     # Install docker module for Python
     - name: Install Docker Module for Python
-      pip:
+      ansible.builtin.pip:
         name:
           - docker
           - docker-compose
 
     # Relogin to gain access to docker
     - name: Reset SSH connection
-      meta: reset_connection
+      ansible.builtin.meta: reset_connection
 
     # Save docker version
     - name: Save docker version
-      shell: docker version --format '{{ '{{' }}.Server.Version{{ '}}' }}'
+      ansible.builtin.shell: docker version --format '{{ '{{' }}.Server.Version{{ '}}' }}'
       register: docker_version
 
     # Save docker compose version
     - name: Save docker compose version
-      shell: docker compose version --short
+      ansible.builtin.shell: docker compose version --short
       register: docker_compose_version
 
     # Output versions
     - name: Output versions
-      debug:
+      ansible.builtin.debug:
         msg: "Docker version: {{ docker_version.stdout }}    Docker Compose version: {{ docker_compose_version.stdout }}"
