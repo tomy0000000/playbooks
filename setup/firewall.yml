@@ -13,12 +13,17 @@
         state: latest
         update_cache: true
 
-    - name: UFW - Allow SSH connections
+    - name: Allow SSH connections
       community.general.ufw:
         rule: allow
         name: OpenSSH
 
-    - name: UFW - Enable and deny by default
+    - name: Allow VNC connections
+      community.general.ufw:
+        rule: allow
+        port: "5900"
+
+    - name: Enable firewall and deny by default
       community.general.ufw:
         state: enabled
         default: deny
