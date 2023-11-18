@@ -40,7 +40,7 @@
         update_cache: true
 
     # Add user to docker group
-    - name: Adding user '{{ ansible_user }}' to group docker
+    - name: Adding user to docker group
       become: true
       ansible.builtin.user:
         name: "{{ ansible_user }}"
@@ -73,12 +73,12 @@
 
     # Save docker version
     - name: Save docker version
-      ansible.builtin.shell: docker version --format '{{ '{{' }}.Server.Version{{ '}}' }}'
+      ansible.builtin.command: docker version --format '{{ '{{' }}.Server.Version{{ '}}' }}'
       register: docker_version
 
     # Save docker compose version
     - name: Save docker compose version
-      ansible.builtin.shell: docker compose version --short
+      ansible.builtin.command: docker compose version --short
       register: docker_compose_version
 
     # Output versions

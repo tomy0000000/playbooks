@@ -2,8 +2,8 @@
 ---
 - hosts: all
   vars:
-    base_dir: "Developing"
-    project_name: "portainer-agent"
+    base_dir: Developing
+    project_name: portainer-agent
     service_dir: "{{ base_dir }}/{{ project_name }}"
 
   tasks:

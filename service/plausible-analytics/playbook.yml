@@ -2,12 +2,12 @@
 ---
 - hosts: all
   vars:
-    base_dir: "Developing"
-    project_name: "plausible-analytics"
+    base_dir: Developing
+    project_name: plausible-analytics
     service_dir: "{{ base_dir }}/{{ project_name }}"
   vars_prompt:
-    - name: "docker_network"
-      prompt: "Enter the name of the docker network to use"
+    - name: docker_network
+      prompt: Enter the name of the docker network to use
       private: false
     - name: domain
       prompt: Which domain would you like to use
@@ -19,25 +19,25 @@
         path: "{{ service_dir }}"
       register: git_dir
 
-    - name: Stash git changes if cloned
-      when: git_dir.stat.exists == true
+    - name: Stash git changes if cloned # noqa: command-instead-of-module
+      when: git_dir.stat.exists
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
-        cmd: "git stash"
+        cmd: git stash
 
     - name: Clone the repository
       ansible.builtin.git:
         repo: https://github.com/plausible/hosting
         dest: "{{ service_dir }}"
         force: true
-        version: "bb6decee4d33ccf84eb235b6053443a01498db53"
-        refspec: "bb6decee4d33ccf84eb235b6053443a01498db53"
+        version: bb6decee4d33ccf84eb235b6053443a01498db53
+        refspec: bb6decee4d33ccf84eb235b6053443a01498db53
 
-    - name: Unstash git changes if cloned
-      when: git_dir.stat.exists == true
+    - name: Unstash git changes if cloned # noqa: command-instead-of-module
+      when: git_dir.stat.exists
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
-        cmd: "git stash pop"
+        cmd: git stash pop
       register: unstash_output
       failed_when:
         - unstash_output.failed
@@ -46,7 +46,7 @@
     - name: Remove port exposing
       ansible.builtin.replace:
         path: "{{ service_dir }}/docker-compose.yml"
-        regexp: "^\\s+ports:\\n\\s+\\-\\s+\"?8000:8000\"?\\n"
+        regexp: ^\s+ports:\n\s+\-\s+"?8000:8000"?\n
         replace: ""
 
     - name: Check BASE_URL is set
@@ -58,12 +58,12 @@
       register: base_url_set
 
     - name: Setup BASE_URL
-      when: base_url_set.found == true
+      when: base_url_set.found
       ansible.builtin.lineinfile:
         path: "{{ service_dir }}/plausible-conf.env"
         state: present
-        regexp: "^BASE_URL=replace-me"
-        line: "BASE_URL=http://{{ domain }}"
+        regexp: ^BASE_URL=replace-me
+        line: BASE_URL=http://{{ domain }}
 
     - name: Check SECRET_KEY_BASE is set
       ansible.builtin.lineinfile:
@@ -74,17 +74,20 @@
       register: secret_key_base_set
 
     - name: Generate SECRET_KEY_BASE
-      when: secret_key_base_set.found == true
-      ansible.builtin.shell: "openssl rand -base64 64 | tr -d '\n'"
+      when: secret_key_base_set.found
+      ansible.builtin.shell:
+        cmd: |
+          set -o pipefail
+          openssl rand -base64 64 | tr -d '\n'
       register: secret_key_base
 
     - name: Setup SECRET_KEY_BASE
-      when: secret_key_base_set.found == true
+      when: secret_key_base_set.found
       ansible.builtin.lineinfile:
         path: "{{ service_dir }}/plausible-conf.env"
         state: present
-        regexp: "^SECRET_KEY_BASE=replace-me"
-        line: "SECRET_KEY_BASE={{ secret_key_base.stdout }}"
+        regexp: ^SECRET_KEY_BASE=replace-me
+        line: SECRET_KEY_BASE={{ secret_key_base.stdout }}
 
     - name: Add networks block if docker_network is set
       when: docker_network is defined

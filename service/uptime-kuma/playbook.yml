@@ -2,17 +2,17 @@
 ---
 - hosts: all
   vars:
-    base_dir: "Developing"
-    project_name: "uptime-kuma"
+    base_dir: Developing
+    project_name: uptime-kuma
     service_dir: "{{ base_dir }}/{{ project_name }}"
   vars_prompt:
     - name: docker_network
       prompt: Which network should Uptime Kuma be connected to
-      default: "caddy"
+      default: caddy
       private: false
     - name: domain
       prompt: Which domain would you like to use
-      default: "kuma.tomy.me"
+      default: kuma.tomy.me
       private: false
 
   tasks:

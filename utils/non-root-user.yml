@@ -1,3 +1,4 @@
+---
 - name: Create a new regular user with sudo privileges
   ansible.builtin.user:
     name: "{{ username }}"
@@ -18,14 +19,14 @@
   ansible.builtin.lineinfile:
     path: /etc/ssh/sshd_config
     state: present
-    regexp: "^#?PermitRootLogin"
-    line: "PermitRootLogin prohibit-password"
+    regexp: ^#?PermitRootLogin
+    line: PermitRootLogin prohibit-password
 
 - name: Setup passwordless sudo
   become: true
   ansible.builtin.lineinfile:
     path: /etc/sudoers
     state: present
-    regexp: "^%sudo"
+    regexp: ^%sudo
     line: "%sudo ALL=(ALL) NOPASSWD: ALL"
-    validate: "/usr/sbin/visudo -cf %s"
+    validate: /usr/sbin/visudo -cf %s

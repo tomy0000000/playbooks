@@ -2,13 +2,13 @@
 ---
 - hosts: all
   vars:
-    base_dir: "Developing"
-    project_name: "portainer"
+    base_dir: Developing
+    project_name: portainer
     service_dir: "{{ base_dir }}/{{ project_name }}"
   vars_prompt:
-    - name: "docker_network"
-      prompt: "Enter the name of the docker network to use"
-      default: "nginx-proxy-manager"
+    - name: docker_network
+      prompt: Enter the name of the docker network to use
+      default: nginx-proxy-manager
 
   tasks:
     - name: Create service directory

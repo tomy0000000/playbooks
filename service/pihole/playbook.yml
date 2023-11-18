@@ -2,19 +2,19 @@
 ---
 - hosts: all
   vars:
-    base_dir: "Developing"
-    project_name: "pihole"
+    base_dir: Developing
+    project_name: pihole
     service_dir: "{{ base_dir }}/{{ project_name }}"
   vars_prompt:
-    - name: "docker_network"
-      prompt: "Enter the name of the docker network to use"
-      default: "nginx-proxy-manager"
-    - name: "domain"
-      prompt: "Which domain would you like to use"
-      default: "pihole.tomy.me"
+    - name: docker_network
+      prompt: Enter the name of the docker network to use
+      default: nginx-proxy-manager
+    - name: domain
+      prompt: Which domain would you like to use
+      default: pihole.tomy.me
       private: false
-    - name: "password"
-      prompt: "Enter the password for the pihole web interface (Only create on first install)"
+    - name: password
+      prompt: Enter the password for the pihole web interface (Only create on first install)
       default: '{{ lookup("ansible.builtin.password", "/tmp/passwordfile") }}'
       private: true
 
@@ -74,14 +74,14 @@
       ansible.builtin.lineinfile:
         path: /etc/resolv.conf
         firstmatch: true
-        insertbefore: "^nameserver*"
-        line: "nameserver 127.0.0.1"
+        insertbefore: ^nameserver*
+        line: nameserver 127.0.0.1
 
     - name: Save to 1Password
       ansible.builtin.import_tasks: ../../utils/1password-save-login/tasks.yml
       when: not dot_env.stat.exists
       vars:
-        name: "Pi-hole"
-        url: "https://{{ domain }}"
+        title: Pi-hole
+        url: https://{{ domain }}
 
     # TODO: Configure Nginx Proxy Manager

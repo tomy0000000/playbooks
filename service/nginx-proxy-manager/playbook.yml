@@ -2,7 +2,7 @@
 ---
 - hosts: all
   vars:
-    service_dir: "Developing/nginx-proxy-manager"
+    service_dir: Developing/nginx-proxy-manager
 
   tasks:
     - name: Create service directory

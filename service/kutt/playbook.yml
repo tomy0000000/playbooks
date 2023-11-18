@@ -2,18 +2,18 @@
 ---
 - hosts: all
   vars:
-    base_dir: "Developing"
-    project_name: "kutt"
+    base_dir: Developing
+    project_name: kutt
     service_dir: "{{ base_dir }}/{{ project_name }}"
     db_password: "{{ lookup('password', '/tmp/passwordfile') }}"
     jwt_secret: "{{ lookup('password', '/tmp/passwordfile') }}"
   vars_prompt:
-    - name: "docker_network"
-      prompt: "Enter the name of the docker network to use"
-      default: "caddy"
-    - name: "domain"
-      prompt: "Which domain would you like to use"
-      default: "kutt.tomy.me"
+    - name: docker_network
+      prompt: Enter the name of the docker network to use
+      default: caddy
+    - name: domain
+      prompt: Which domain would you like to use
+      default: kutt.tomy.me
       private: false
 
   tasks:
@@ -36,32 +36,32 @@
     - name: Setup DEFAULT_DOMAIN in .env file
       ansible.builtin.lineinfile:
         path: .env
-        regexp: "^DEFAULT_DOMAIN=$"
-        line: "DEFAULT_DOMAIN={{ domain }}"
+        regexp: ^DEFAULT_DOMAIN=$
+        line: DEFAULT_DOMAIN={{ domain }}
         backrefs: true
       when: not dot_env.stat.exists
 
     - name: Setup POSTGRES_PASSWORD in .env file
       ansible.builtin.lineinfile:
         path: .env
-        regexp: "^POSTGRES_PASSWORD=$"
-        line: "POSTGRES_PASSWORD={{ db_password }}"
+        regexp: ^POSTGRES_PASSWORD=$
+        line: POSTGRES_PASSWORD={{ db_password }}
         backrefs: true
       when: not dot_env.stat.exists
 
     - name: Setup DB_PASSWORD in .env file
       ansible.builtin.lineinfile:
         path: .env
-        regexp: "^DB_PASSWORD=$"
-        line: "DB_PASSWORD={{ db_password }}"
+        regexp: ^DB_PASSWORD=$
+        line: DB_PASSWORD={{ db_password }}
         backrefs: true
       when: not dot_env.stat.exists
 
     - name: Setup JWT_SECRET in .env file
       ansible.builtin.lineinfile:
         path: .env
-        regexp: "^JWT_SECRET=$"
-        line: "JWT_SECRET={{ jwt_secret }}"
+        regexp: ^JWT_SECRET=$
+        line: JWT_SECRET={{ jwt_secret }}
         backrefs: true
       when: not dot_env.stat.exists
 
