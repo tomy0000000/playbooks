@@ -10,7 +10,7 @@
         pkg:
           - ca-certificates
           - gnupg
-        state: latest
+        state: present
         update_cache: true
 
     - name: Add Docker GPG apt Key
@@ -36,7 +36,7 @@
           - docker-ce-cli
           - containerd.io
           - docker-compose-plugin
-        state: latest
+        state: present
         update_cache: true
 
     # Add user to docker group

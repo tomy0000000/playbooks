@@ -9,5 +9,5 @@
           - iputils-ping # ping
           - whois # whois
           - dnsutils # nslookup
-        state: latest
+        state: present
         update_cache: true

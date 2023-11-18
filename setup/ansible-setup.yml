@@ -7,5 +7,5 @@
         name:
           - aptitude
           - python3-pip
-        state: latest
+        state: present
         update_cache: true

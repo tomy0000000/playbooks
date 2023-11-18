@@ -10,7 +10,7 @@
           - vim
           - git
           - ufw
-        state: latest
+        state: present
         update_cache: true
 
     - name: Allow SSH connections
