@@ -38,7 +38,7 @@
         path: .env
         regexp: "^DEFAULT_DOMAIN=$"
         line: "DEFAULT_DOMAIN={{ domain }}"
-        backrefs: yes
+        backrefs: true
       when: not dot_env.stat.exists
 
     - name: Setup POSTGRES_PASSWORD in .env file
@@ -46,7 +46,7 @@
         path: .env
         regexp: "^POSTGRES_PASSWORD=$"
         line: "POSTGRES_PASSWORD={{ db_password }}"
-        backrefs: yes
+        backrefs: true
       when: not dot_env.stat.exists
 
     - name: Setup DB_PASSWORD in .env file
@@ -54,7 +54,7 @@
         path: .env
         regexp: "^DB_PASSWORD=$"
         line: "DB_PASSWORD={{ db_password }}"
-        backrefs: yes
+        backrefs: true
       when: not dot_env.stat.exists
 
     - name: Setup JWT_SECRET in .env file
@@ -62,7 +62,7 @@
         path: .env
         regexp: "^JWT_SECRET=$"
         line: "JWT_SECRET={{ jwt_secret }}"
-        backrefs: yes
+        backrefs: true
       when: not dot_env.stat.exists
 
     - name: Create docker-compose.yml
