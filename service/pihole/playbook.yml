@@ -21,20 +21,20 @@
   tasks:
     - name: Disable local DNS # So that port 53 is available
       become: true
-      import_tasks: ../../utils/disable-local-dns/tasks.yml
+      ansible.builtin.import_tasks: ../../utils/disable-local-dns/tasks.yml
 
     - name: Create service directory
-      file:
+      ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
 
     - name: Check .env file
-      stat:
+      ansible.builtin.stat:
         path: "{{ service_dir }}/.env"
       register: dot_env
 
     - name: Create .env file
-      copy:
+      ansible.builtin.copy:
         dest: "{{ service_dir }}/.env"
         content: |
           WEBPASSWORD='{{ password }}'
@@ -42,13 +42,13 @@
       when: not dot_env.stat.exists
 
     - name: Create docker-compose.yml
-      copy:
+      ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
 
     - name: Add networks block if docker_network is set
       when: docker_network is defined
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ service_dir }}/docker-compose.yml"
         block: |
           networks:
@@ -57,28 +57,28 @@
               name: "{{ docker_network }}"
 
     - name: Pull images
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
 
     - name: Start services
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../../utils/cloudflare-dns-cname.yml
+      ansible.builtin.import_tasks: ../../utils/cloudflare-dns-cname.yml
 
     - name: Add pihole to /etc/resolv.conf
       become: true
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/resolv.conf
         firstmatch: true
         insertbefore: "^nameserver*"
         line: "nameserver 127.0.0.1"
 
     - name: Save to 1Password
-      import_tasks: ../../utils/1password-save-login/tasks.yml
+      ansible.builtin.import_tasks: ../../utils/1password-save-login/tasks.yml
       when: not dot_env.stat.exists
       vars:
         name: "Pi-hole"

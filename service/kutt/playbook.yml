@@ -18,23 +18,23 @@
 
   tasks:
     - name: Create service directory
-      file:
+      ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
 
     - name: Check .env file
-      stat:
+      ansible.builtin.stat:
         path: "{{ service_dir }}/.env"
       register: dot_env
 
     - name: Create .env file
-      copy:
+      ansible.builtin.copy:
         src: .env
         dest: "{{ service_dir }}/.env"
       when: not dot_env.stat.exists
 
     - name: Setup DEFAULT_DOMAIN in .env file
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: .env
         regexp: "^DEFAULT_DOMAIN=$"
         line: "DEFAULT_DOMAIN={{ domain }}"
@@ -42,7 +42,7 @@
       when: not dot_env.stat.exists
 
     - name: Setup POSTGRES_PASSWORD in .env file
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: .env
         regexp: "^POSTGRES_PASSWORD=$"
         line: "POSTGRES_PASSWORD={{ db_password }}"
@@ -50,7 +50,7 @@
       when: not dot_env.stat.exists
 
     - name: Setup DB_PASSWORD in .env file
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: .env
         regexp: "^DB_PASSWORD=$"
         line: "DB_PASSWORD={{ db_password }}"
@@ -58,7 +58,7 @@
       when: not dot_env.stat.exists
 
     - name: Setup JWT_SECRET in .env file
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: .env
         regexp: "^JWT_SECRET=$"
         line: "JWT_SECRET={{ jwt_secret }}"
@@ -66,13 +66,13 @@
       when: not dot_env.stat.exists
 
     - name: Create docker-compose.yml
-      copy:
+      ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
 
     - name: Add networks block if docker_network is set
       when: docker_network is defined
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ service_dir }}/docker-compose.yml"
         block: |
           networks:
@@ -81,16 +81,16 @@
               name: "{{ docker_network }}"
 
     - name: Pull images
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
 
     - name: Start services
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../../utils/cloudflare-dns-cname.yml
+      ansible.builtin.import_tasks: ../../utils/cloudflare-dns-cname.yml
 
     # TODO: Setup reverse proxy

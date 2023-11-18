@@ -5,4 +5,4 @@
     public_key: "https://github.com/tomy0000000.keys"
   tasks:
     - name: Setup non-root user
-      import_tasks: ../utils/non-root-user.yml
+      ansible.builtin.import_tasks: ../utils/non-root-user.yml

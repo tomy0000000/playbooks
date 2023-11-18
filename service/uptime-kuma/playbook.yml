@@ -17,18 +17,18 @@
 
   tasks:
     - name: Create service directory
-      file:
+      ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
 
     - name: Create docker-compose.yml
-      copy:
+      ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
 
     - name: Add networks block if docker_network is set
       when: docker_network is defined
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ service_dir }}/docker-compose.yml"
         block: |
           networks:
@@ -37,16 +37,16 @@
               name: "{{ docker_network }}"
 
     - name: Pull images
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
 
     - name: Start services
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../../utils/cloudflare-dns-cname.yml
+      ansible.builtin.import_tasks: ../../utils/cloudflare-dns-cname.yml
 
     # TODO: Add entry to Caddyfile

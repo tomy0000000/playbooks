@@ -6,7 +6,7 @@
 
   tasks:
     - name: Create service directory
-      file:
+      ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
 
@@ -15,16 +15,16 @@
         name: nginx-proxy-manager
 
     - name: Create docker-compose.yml
-      copy:
+      ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
 
     - name: Pull images
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
 
     - name: Start services
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach

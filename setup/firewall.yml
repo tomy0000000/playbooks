@@ -4,7 +4,7 @@
 
   tasks:
     - name: Update apt and install required system packages
-      apt:
+      ansible.builtin.apt:
         pkg:
           - curl
           - vim

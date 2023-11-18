@@ -3,7 +3,7 @@
   tasks:
     - name: Install packages
       become: true
-      apt:
+      ansible.builtin.apt:
         name:
           - dnsutils # dig
           - iputils-ping # ping

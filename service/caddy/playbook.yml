@@ -8,7 +8,7 @@
 
   tasks:
     - name: Create service directory
-      file:
+      ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
 
@@ -17,27 +17,27 @@
         name: caddy
 
     - name: Check if Caddyfile exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ service_dir }}/Caddyfile"
       register: caddyfile
 
     - name: Create Caddyfile if not exists
       when: not caddyfile.stat.exists
-      copy:
+      ansible.builtin.copy:
         dest: "{{ service_dir }}/Caddyfile"
         content: ":80 {\n    root * /usr/share/caddy\n    file_server\n}"
 
     - name: Create docker-compose.yml
-      copy:
+      ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
 
     - name: Pull images
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
 
     - name: Start services
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach

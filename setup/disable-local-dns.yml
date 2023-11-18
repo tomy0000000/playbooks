@@ -4,4 +4,4 @@
   tasks:
     - name: Disable local DNS
       become: true
-      import_tasks: ../utils/disable-local-dns/tasks.yml
+      ansible.builtin.import_tasks: ../utils/disable-local-dns/tasks.yml

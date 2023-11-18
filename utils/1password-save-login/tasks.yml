@@ -5,5 +5,5 @@
 
 - name: Save credentials to 1Password
   delegate_to: localhost
-  shell:
+  ansible.builtin.shell:
     cmd: "set -o pipefail && echo '{{ credentials | tojson | replace(\"\\\\\", \"\\\\\\\\\") }}' | op item create"

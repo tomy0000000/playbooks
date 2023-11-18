@@ -15,18 +15,18 @@
 
   tasks:
     - name: Check if plausible-analytics directory is cloned
-      stat:
+      ansible.builtin.stat:
         path: "{{ service_dir }}"
       register: git_dir
 
     - name: Stash git changes if cloned
       when: git_dir.stat.exists == true
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: "git stash"
 
     - name: Clone the repository
-      git:
+      ansible.builtin.git:
         repo: https://github.com/plausible/hosting
         dest: "{{ service_dir }}"
         force: true
@@ -35,7 +35,7 @@
 
     - name: Unstash git changes if cloned
       when: git_dir.stat.exists == true
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: "git stash pop"
       register: unstash_output
@@ -44,13 +44,13 @@
         - not 'No stash entries found' in unstash_output.stderr
 
     - name: Remove port exposing
-      replace:
+      ansible.builtin.replace:
         path: "{{ service_dir }}/docker-compose.yml"
         regexp: "^\\s+ports:\\n\\s+\\-\\s+\"?8000:8000\"?\\n"
         replace: ""
 
     - name: Check BASE_URL is set
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ service_dir }}/plausible-conf.env"
         state: absent
         search_string: BASE_URL=replace-me
@@ -59,14 +59,14 @@
 
     - name: Setup BASE_URL
       when: base_url_set.found == true
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ service_dir }}/plausible-conf.env"
         state: present
         regexp: "^BASE_URL=replace-me"
         line: "BASE_URL=http://{{ domain }}"
 
     - name: Check SECRET_KEY_BASE is set
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ service_dir }}/plausible-conf.env"
         state: absent
         search_string: SECRET_KEY_BASE=replace-me
@@ -75,12 +75,12 @@
 
     - name: Generate SECRET_KEY_BASE
       when: secret_key_base_set.found == true
-      shell: "openssl rand -base64 64 | tr -d '\n'"
+      ansible.builtin.shell: "openssl rand -base64 64 | tr -d '\n'"
       register: secret_key_base
 
     - name: Setup SECRET_KEY_BASE
       when: secret_key_base_set.found == true
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: "{{ service_dir }}/plausible-conf.env"
         state: present
         regexp: "^SECRET_KEY_BASE=replace-me"
@@ -88,7 +88,7 @@
 
     - name: Add networks block if docker_network is set
       when: docker_network is defined
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: "{{ service_dir }}/docker-compose.yml"
         block: |
           networks:
@@ -97,17 +97,17 @@
               name: "{{ docker_network }}"
 
     - name: Pull images
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
 
     - name: Start services
-      command:
+      ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
 
     - name: Setup DNS record
-      import_tasks: ../../utils/cloudflare-dns-cname.yml
+      ansible.builtin.import_tasks: ../../utils/cloudflare-dns-cname.yml
 
     # TODO: Setup reverse proxy
 

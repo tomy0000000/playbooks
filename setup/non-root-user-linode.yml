@@ -5,4 +5,4 @@
     public_key: "{{ lookup('community.general.onepassword', 'Linode Key', field='public key') }}"
   tasks:
     - name: Setup non-root user
-      import_tasks: ../utils/non-root-user.yml
+      ansible.builtin.import_tasks: ../utils/non-root-user.yml
