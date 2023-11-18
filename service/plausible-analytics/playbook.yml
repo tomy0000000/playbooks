@@ -2,7 +2,9 @@
 ---
 - hosts: all
   vars:
-    service_dir: plausible-analytics
+    base_dir: "Developing"
+    project_name: "plausible-analytics"
+    service_dir: "{{ base_dir }}/{{ project_name }}"
   vars_prompt:
     - name: "docker_network"
       prompt: "Enter the name of the docker network to use"
