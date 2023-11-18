@@ -19,11 +19,29 @@
         path: "{{ service_dir }}"
       register: git_dir
 
-    - name: Clone a repo with separate git directory
-      when: not git_dir.stat.exists
+    - name: Stash git changes if cloned
+      when: git_dir.stat.exists == true
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: "git stash"
+
+    - name: Clone the repository
       git:
         repo: https://github.com/plausible/hosting
         dest: "{{ service_dir }}"
+        force: true
+        version: "bb6decee4d33ccf84eb235b6053443a01498db53"
+        refspec: "bb6decee4d33ccf84eb235b6053443a01498db53"
+
+    - name: Unstash git changes if cloned
+      when: git_dir.stat.exists == true
+      command:
+        chdir: "{{ service_dir }}"
+        cmd: "git stash pop"
+      register: unstash_output
+      failed_when:
+        - unstash_output.failed
+        - not 'No stash entries found' in unstash_output.stderr
 
     - name: Remove port exposing
       replace:
