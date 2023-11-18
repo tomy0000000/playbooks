@@ -1,6 +1,8 @@
 ---
 - hosts: all
+  vars:
+    username: "tomy0000000"
+    public_key: "{{ lookup('community.general.onepassword', 'Linode Key', field='public key') }}"
   tasks:
-    - import_tasks: non-root-user.yml
-      vars:
-        public_key: "{{ lookup('community.general.onepassword', 'Linode Key', field='public key') }}"
+    - name: Setup non-root user
+      import_tasks: ../utils/non-root-user.yml

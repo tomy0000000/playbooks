@@ -1,0 +1,31 @@
+- name: Create a new regular user with sudo privileges
+  user:
+    name: "{{ username }}"
+    state: present
+    groups: sudo
+    shell: /bin/bash
+    append: true
+    create_home: true
+
+- name: Set authorized key for remote user with 1Password
+  ansible.posix.authorized_key:
+    user: "{{ username }}"
+    state: present
+    key: "{{ public_key }}"
+
+- name: Disable password authentication for root
+  become: true
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^#?PermitRootLogin"
+    line: "PermitRootLogin prohibit-password"
+
+- name: Setup passwordless sudo
+  become: true
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: "^%sudo"
+    line: "%sudo ALL=(ALL) NOPASSWD: ALL"
+    validate: "/usr/sbin/visudo -cf %s"
