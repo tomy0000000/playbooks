@@ -70,10 +70,11 @@ ansible-playbook -l some-host service/.../playbook.yml
 
 ## Compose File Rules
 
-- Don't add the service prefix to compose service name (e.g. just use `app` or `portainer` instead of `portainer_app`)
+- Don't add the service prefix to compose service name (e.g., use ` app` or `portainer` instead of `portainer_app`)
 - Don't add the service prefix to compose volume name [^2]
 - Always set the `container_name` for each service
-- Pin image version at minor level (e.g. `image: nginx:1.19`) if not specified in the documentation
+- Pin image version at a minor level (e.g., `image:` nginx:1.19`) if not specified in the documentation
+- Do not expose ports if not required to
 
 [^1]: Most server have compose v2 installed, which is not supported
 [^2]: Prefix will be added automatically
