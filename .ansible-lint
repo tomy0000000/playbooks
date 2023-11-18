@@ -1,0 +1,9 @@
+---
+profile: null
+
+exclude_paths:
+  - .github/
+  - requirements.yml
+  - docker-compose.yml
+
+offline: false
