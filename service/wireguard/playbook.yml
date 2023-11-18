@@ -70,7 +70,7 @@
       ansible.builtin.import_tasks: ../../utils/1password-save-login/tasks.yml
       when: not dot_env.stat.exists
       vars:
-        name: "WireGuard Easy"
+        title: "WireGuard Easy"
         url: "https://{{ domain }}"
 
     # TODO: Configure Nginx Proxy Manager
