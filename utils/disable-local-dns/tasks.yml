@@ -29,6 +29,7 @@
   ansible.builtin.copy:
     src: ./resolv.conf
     dest: /etc/resolv.conf
+    mode: "preserve"
   check_mode: true
   register: resolv_conf_check
 
@@ -38,6 +39,7 @@
     dest: /etc/resolv.conf.bak
     remote_src: true
     force: true
+    mode: "preserve"
   when: systemd_resolved_stopped.changed and resolv_conf_check.changed
 
 - name: Update /etc/resolv.conf
@@ -45,6 +47,7 @@
     src: ./resolv.conf
     dest: /etc/resolv.conf
     force: true
+    mode: "0644"
   when: systemd_resolved_stopped.changed and resolv_conf_check.changed
 
 - name: Check if Docker is installed

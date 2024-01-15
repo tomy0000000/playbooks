@@ -10,6 +10,7 @@
       ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
+        mode: "0755"
 
     - name: Create 'nginx-proxy-manager' network
       community.docker.docker_network:
@@ -19,6 +20,7 @@
       ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
+        mode: "0755"
 
     - name: Pull images
       ansible.builtin.command:

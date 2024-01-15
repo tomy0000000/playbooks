@@ -12,6 +12,7 @@
       ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
+        mode: "0755"
 
     - name: Create 'caddy' network
       community.docker.docker_network:
@@ -27,11 +28,13 @@
       ansible.builtin.copy:
         dest: "{{ service_dir }}/Caddyfile"
         content: ":80 {\n    root * /usr/share/caddy\n    file_server\n}"
+        mode: "0755"
 
     - name: Create docker-compose.yml
       ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
+        mode: "0755"
 
     - name: Pull images
       ansible.builtin.command:

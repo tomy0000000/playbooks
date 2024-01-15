@@ -28,6 +28,7 @@
       ansible.builtin.file:
         path: "{{ service_dir }}"
         state: directory
+        mode: "0755"
 
     - name: Check .env file
       ansible.builtin.stat:
@@ -40,12 +41,14 @@
         content: |
           WEBPASSWORD='{{ password }}'
           VIRTUAL_HOST='{{ domain }}'
+        mode: "0755"
       when: not dot_env.stat.exists
 
     - name: Create docker-compose.yml
       ansible.builtin.copy:
         src: ./docker-compose.yml
         dest: "{{ service_dir }}/docker-compose.yml"
+        mode: "0755"
 
     - name: Add networks block if docker_network is set
       when: docker_network is defined
