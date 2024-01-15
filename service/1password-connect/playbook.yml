@@ -1,6 +1,7 @@
 # https://developer.1password.com/docs/connect/get-started#step-2-deploy-1password-connect-server
 ---
-- hosts: all
+- name: Playbook to deploy 1Password Connect
+  hosts: all
   vars:
     base_dir: Developing
     project_name: 1password-connect

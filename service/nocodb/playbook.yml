@@ -1,6 +1,7 @@
 # https://github.com/nocodb/nocodb/tree/develop#docker-compose
 ---
-- hosts: all
+- name: Playbook for deploying NocoDB
+  hosts: all
   vars:
     base_dir: Developing
     project_name: nocodb

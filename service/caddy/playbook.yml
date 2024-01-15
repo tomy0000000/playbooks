@@ -1,6 +1,7 @@
 # https://hub.docker.com/_/caddy
 ---
-- hosts: all
+- name: Playbook for deploying Caddy
+  hosts: all
   vars:
     base_dir: Developing
     project_name: caddy

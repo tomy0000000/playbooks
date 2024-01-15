@@ -1,6 +1,7 @@
 # https://nginxproxymanager.com/setup/
 ---
-- hosts: all
+- name: Playbook for deploying nginx Proxy Manager
+  hosts: all
   vars:
     service_dir: Developing/nginx-proxy-manager
 

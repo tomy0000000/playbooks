@@ -1,6 +1,7 @@
 # https://docs.docker.com/engine/install/ubuntu/
 ---
-- hosts: all
+- name: Playbook for installing Docker on Ubuntu
+  hosts: all
   gather_facts: true
   tasks:
     # Set up the repository

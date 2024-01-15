@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Playbook for installing network tools
+  hosts: all
   tasks:
     - name: Install packages
       become: true

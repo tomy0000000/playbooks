@@ -1,6 +1,7 @@
 # https://plausible.io/docs/self-hosting
 ---
-- hosts: all
+- name: Playbook for deploying Plausible Analytics
+  hosts: all
   vars:
     base_dir: Developing
     project_name: plausible-analytics

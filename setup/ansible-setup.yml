@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Playbook for setting up Ansible
+  hosts: all
   tasks:
     - name: Install required packages
       become: true

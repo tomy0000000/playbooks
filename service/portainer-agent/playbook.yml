@@ -1,6 +1,7 @@
 # https://docs.portainer.io/start/agent/docker/linux
 ---
-- hosts: all
+- name: Playbook for deploying Portainer agent
+  hosts: all
   vars:
     base_dir: Developing
     project_name: portainer-agent

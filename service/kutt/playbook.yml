@@ -1,6 +1,7 @@
 # https://github.com/thedevs-network/kutt#docker
 ---
-- hosts: all
+- name: Playbook for deploying Kutt
+  hosts: all
   vars:
     base_dir: Developing
     project_name: kutt

@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Playbook for deploying k-backend
+  hosts: all
   vars:
     base_dir: Developing
     project_name: k-backend

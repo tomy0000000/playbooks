@@ -1,6 +1,7 @@
 # https://github.com/louislam/uptime-kuma#-how-to-install
 ---
-- hosts: all
+- name: Playbook for deploying Uptime Kuma
+  hosts: all
   vars:
     base_dir: Developing
     project_name: uptime-kuma

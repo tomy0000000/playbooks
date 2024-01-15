@@ -1,6 +1,7 @@
 # https://github.com/pi-hole/docker-pi-hole
 ---
-- hosts: all
+- name: Playbook for deploying Pi-hole
+  hosts: all
   vars:
     base_dir: Developing
     project_name: pihole

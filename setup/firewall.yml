@@ -1,7 +1,7 @@
 ---
-- hosts: all
+- name: Playbook for setting up Firewall
+  hosts: all
   become: true
-
   tasks:
     - name: Update apt and install required system packages
       ansible.builtin.apt:

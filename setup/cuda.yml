@@ -1,6 +1,7 @@
 # https://github.com/NVIDIA/ansible-role-nvidia-driver
 ---
-- hosts: all
+- name: Playbook for installing NVIDIA drivers and CUDA
+  hosts: all
   become: true
   gather_facts: true
   roles:

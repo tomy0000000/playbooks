@@ -1,6 +1,7 @@
 # https://docs.portainer.io/start/install-ce/server/docker/linux
 ---
-- hosts: all
+- name: Playbook for deploying Portainer
+  hosts: all
   vars:
     base_dir: Developing
     project_name: portainer

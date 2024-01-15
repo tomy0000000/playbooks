@@ -1,6 +1,7 @@
 # https://github.com/linuxserver/docker-wireguard
 ---
-- hosts: all
+- name: Playbook for deploying WireGuard Easy
+  hosts: all
   vars:
     base_dir: Developing
     project_name: wireguard

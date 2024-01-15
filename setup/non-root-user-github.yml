@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Playbook for setting up a non-root user on On-Premise servers with GitHub public key
+  hosts: all
   vars:
     username: tomy0000000
     public_key: https://github.com/tomy0000000.keys

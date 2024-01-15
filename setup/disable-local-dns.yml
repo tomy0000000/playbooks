@@ -1,6 +1,6 @@
 ---
-- hosts: all
-
+- name: Playbook for disabling local DNS
+  hosts: all
   tasks:
     - name: Disable local DNS
       become: true
