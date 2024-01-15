@@ -35,8 +35,10 @@
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
+      changed_when: false
 
     - name: Start services
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
+      changed_when: false

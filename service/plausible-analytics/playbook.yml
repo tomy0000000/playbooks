@@ -24,6 +24,7 @@
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: git stash
+      changed_when: false # git stash does not return a changed status, but it might stash changes
 
     - name: Clone the repository
       ansible.builtin.git:
@@ -42,6 +43,7 @@
       failed_when:
         - unstash_output.failed
         - not 'No stash entries found' in unstash_output.stderr
+      changed_when: not unstash_output.failed
 
     - name: Remove port exposing
       ansible.builtin.replace:
@@ -80,6 +82,7 @@
           set -o pipefail
           openssl rand -base64 64 | tr -d '\n'
       register: secret_key_base
+      changed_when: false
 
     - name: Setup SECRET_KEY_BASE
       when: secret_key_base_set.found
@@ -103,11 +106,13 @@
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose pull
+      changed_when: false
 
     - name: Start services
       ansible.builtin.command:
         chdir: "{{ service_dir }}"
         cmd: docker compose up --detach
+      changed_when: false
 
     - name: Setup DNS record
       ansible.builtin.import_tasks: ../../utils/cloudflare-dns-cname.yml

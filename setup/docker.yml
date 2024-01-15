@@ -75,11 +75,13 @@
     - name: Save docker version
       ansible.builtin.command: docker version --format '{{ '{{' }}.Server.Version{{ '}}' }}'
       register: docker_version
+      changed_when: false
 
     # Save docker compose version
     - name: Save docker compose version
       ansible.builtin.command: docker compose version --short
       register: docker_compose_version
+      changed_when: false
 
     # Output versions
     - name: Output versions

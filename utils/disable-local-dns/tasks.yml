@@ -51,6 +51,7 @@
   ansible.builtin.command: docker --version
   register: docker_installed
   ignore_errors: true
+  changed_when: false
 
 - name: Restart Docker if installed
   ansible.builtin.systemd_service:
