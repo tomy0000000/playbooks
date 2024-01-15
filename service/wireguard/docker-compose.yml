@@ -6,7 +6,7 @@ services:
     container_name: wg-easy
     env_file:
       - .env
-    image: weejewel/wg-easy:latest
+    image: ghcr.io/wg-easy/wg-easy:latest
     ports:
       - "51820:51820/udp"
     restart: always
