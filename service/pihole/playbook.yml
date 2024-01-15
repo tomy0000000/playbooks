@@ -91,3 +91,8 @@
         url: https://{{ domain }}
 
     # TODO: Configure Nginx Proxy Manager
+
+  handlers:
+    - name: Handlers for disabling local DNS
+      become: true
+      ansible.builtin.import_tasks: ../../utils/disable-local-dns/handlers.yml

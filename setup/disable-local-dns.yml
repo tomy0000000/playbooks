@@ -5,3 +5,7 @@
     - name: Disable local DNS
       become: true
       ansible.builtin.import_tasks: ../utils/disable-local-dns/tasks.yml
+  handlers:
+    - name: Handlers for disabling local DNS
+      become: true
+      ansible.builtin.import_tasks: ../utils/disable-local-dns/handlers.yml

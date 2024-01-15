@@ -9,6 +9,7 @@
     name: systemd-resolved
     state: stopped
   register: systemd_resolved_stopped
+  notify: "Reload systemd"
 
 - name: Disable systemd-resolved
   ansible.builtin.systemd_service:
@@ -19,11 +20,6 @@
   ansible.builtin.systemd_service:
     name: systemd-resolved
     masked: true
-
-- name: Reload systemd
-  ansible.builtin.systemd_service:
-    daemon_reload: true
-  when: systemd_resolved_stopped.changed
 
 - name: Check /etc/resolv.conf
   ansible.builtin.copy:
