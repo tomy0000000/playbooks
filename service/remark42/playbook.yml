@@ -1,0 +1,85 @@
+# https://remark42.com/docs/getting-started/installation/
+---
+- name: Setup Remark42
+  hosts: all
+  vars:
+    base_dir: Developing
+    project_name: remark42
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+  vars_prompt:
+    - name: docker_network
+      prompt: Enter the name of the docker network to use
+      private: false
+    - name: domain
+      prompt: Which domain would you like to use
+      private: false
+
+  tasks:
+    - name: Create service directory
+      ansible.builtin.file:
+        path: "{{ service_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Check .env file
+      ansible.builtin.stat:
+        path: "{{ service_dir }}/remark42.env"
+      register: dot_env
+
+    - name: Create .env file
+      ansible.builtin.copy:
+        dest: "{{ service_dir }}/remark42.env"
+        content: |
+          REMARK_URL=https://{{ domain }}
+          SECRET=replace-me
+          AUTH_ANON=true
+        mode: "0755"
+      when: not dot_env.stat.exists
+
+    - name: Generate SECRET
+      when: not dot_env.stat.exists
+      ansible.builtin.shell:
+        cmd: |
+          openssl rand -base64 64 | tr -d '\n'
+      register: secret
+      changed_when: false
+
+    - name: Setup SECRET
+      when: not dot_env.stat.exists
+      ansible.builtin.lineinfile:
+        path: "{{ service_dir }}/remark42.env"
+        state: present
+        regexp: ^SECRET=replace-me
+        line: SECRET={{ secret.stdout }}
+
+    - name: Create docker-compose.yml
+      ansible.builtin.copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+        mode: "0644"
+
+    - name: Add networks block if docker_network is set
+      when: docker_network is defined
+      ansible.builtin.blockinfile:
+        path: "{{ service_dir }}/docker-compose.yml"
+        block: |
+          networks:
+            default:
+              external: true
+              name: "{{ docker_network }}"
+
+    - name: Pull images
+      ansible.builtin.command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+
+    - name: Start services
+      ansible.builtin.command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+
+    - name: Setup DNS record
+      when: domain is defined
+      ansible.builtin.import_tasks: ../../utils/cloudflare-dns-cname.yml
+
+    # TODO: Setup reverse proxy
