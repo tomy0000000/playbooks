@@ -43,7 +43,7 @@
         state: directory
         mode: "0755"
 
-    # TODO: Create production.env
+    # TODO: Create .env
 
     - name: Pull images
       ansible.builtin.command:

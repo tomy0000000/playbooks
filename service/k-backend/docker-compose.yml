@@ -1,37 +1,36 @@
 services:
   api:
-    container_name: k-backend-api
-    command: "uvicorn k_backend.main:app --host 0.0.0.0 --port 8000"
+    container_name: "k-backend-api"
     depends_on:
-      - "postgres"
+      - "db"
     env_file:
-      - "instance/production.env"
-    image: "tomy0000000/k-backend:0.7"
-    restart: always
+      - "instance/.env"
+    image: "tomy0000000/k-backend:0.8.1"
+    restart: "always"
     volumes:
       - "./instance:/usr/src/k-backend/instance"
 
-  postgres:
-    container_name: k-backend-db
+  db:
+    container_name: "k-backend-db"
     env_file:
-      - "instance/production.env"
+      - "instance/.env"
     image: "postgres:15.2"
     ports:
       - "127.0.0.1:5490:5432"
-    restart: always
+    restart: "always"
     volumes:
       - "data:/var/lib/postgresql/data"
 
   backup:
-    container_name: k-backend-backup
+    container_name: "k-backend-backup"
     depends_on:
-      - "postgres"
+      - "db"
     env_file:
-      - "instance/production.env"
+      - "instance/.env"
     environment:
       - "POSTGRES_BACKUP_DROPBOX_DIR=/Backups/K"
     image: "tomy0000000/postgres-backup-dropbox:15.2"
-    restart: always
+    restart: "always"
 
 volumes:
   data:
