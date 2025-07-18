@@ -1,0 +1,14 @@
+services:
+  postgres:
+    container_name: "postgres"
+    env_file:
+      - ".env"
+    image: "postgres:17"
+    ports:
+      - 127.0.0.1:5432:5432
+    restart: "always"
+    volumes:
+      - "data:/var/lib/postgresql/data"
+
+volumes:
+  data:

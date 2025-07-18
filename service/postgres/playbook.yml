@@ -1,0 +1,51 @@
+# https://hub.docker.com/_/postgres
+---
+- name: Playbook for deploying Postgres
+  hosts: all
+  vars:
+    base_dir: Developing
+    project_name: postgres
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+
+  tasks:
+    - name: Create service directory
+      ansible.builtin.file:
+        path: "{{ service_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Check if .env exists
+      ansible.builtin.stat:
+        path: "{{ service_dir }}/.env"
+      register: env_file
+
+    - name: Generate random Postgres password
+      ansible.builtin.set_fact:
+        postgres_password: "{{ lookup('password', '/dev/null length=32 chars=ascii_letters,digits') }}"
+      when: not env_file.stat.exists
+
+    - name: Create .env with Postgres password
+      ansible.builtin.copy:
+        dest: "{{ service_dir }}/.env"
+        content: |
+          POSTGRES_PASSWORD={{ postgres_password }}
+        mode: "0600"
+      when: not env_file.stat.exists
+
+    - name: Create docker-compose.yml
+      ansible.builtin.copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+        mode: "0755"
+
+    - name: Pull images
+      ansible.builtin.command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose pull
+      changed_when: false
+
+    - name: Start services
+      ansible.builtin.command:
+        chdir: "{{ service_dir }}"
+        cmd: docker compose up --detach
+      changed_when: false
