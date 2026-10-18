@@ -6,7 +6,7 @@ services:
     container_name: wg-easy
     env_file:
       - .env
-    image: ghcr.io/wg-easy/wg-easy:13
+    image: ghcr.io/wg-easy/wg-easy:15
     ports:
       - "51820:51820/udp"
     restart: always
@@ -15,3 +15,4 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
     volumes:
       - "./wg-easy:/etc/wireguard"
+      - "/lib/modules:/lib/modules:ro"
