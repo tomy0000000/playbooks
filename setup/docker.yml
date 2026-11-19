@@ -63,10 +63,11 @@
 
     # Install docker module for Python
     - name: Install Docker Module for Python
-      ansible.builtin.pip:
-        name:
-          - docker
-          - docker-compose
+      become: true
+      ansible.builtin.apt:
+        pkg:
+          - python3-docker
+        state: present
 
     # Relogin to gain access to docker
     - name: Reset SSH connection
