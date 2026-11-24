@@ -1,0 +1,4 @@
+[tools]
+uv = { version = "latest" }
+python = { version = "3.9" }
+ansible = { version = "8.7.0", uvx = "true", uvx_args = "--with-executables-from yamllint,ansible-core,ansible-lint,molecule" }
