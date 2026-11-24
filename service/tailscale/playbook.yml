@@ -1,0 +1,79 @@
+# https://tailscale.com/kb/1282/docker
+---
+- name: Playbook for deploying Tailscale
+  hosts: all
+  vars:
+    base_dir: Developing
+    project_name: tailscale
+    service_dir: "{{ base_dir }}/{{ project_name }}"
+
+  tasks:
+    - name: Create service directory
+      ansible.builtin.file:
+        path: "{{ service_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Create 'tailscale' network
+      community.docker.docker_network:
+        name: tailscale
+
+    - name: Create .env file
+      ansible.builtin.copy:
+        dest: "{{ service_dir }}/.env"
+        content: |
+          TS_HOSTNAME='{{ inventory_hostname }}'
+        mode: "0644"
+
+    - name: Create docker-compose.yml
+      ansible.builtin.copy:
+        src: ./docker-compose.yml
+        dest: "{{ service_dir }}/docker-compose.yml"
+        mode: "0644"
+
+    - name: Start services
+      community.docker.docker_compose_v2:
+        project_src: "{{ service_dir }}"
+        pull: always
+
+    - name: Wait for Tailscale to report its login state
+      community.docker.docker_container_exec:
+        container: tailscale
+        command: tailscale status --json
+      register: tailscale_status
+      until: tailscale_status is succeeded and tailscale_status.rc == 0 and (tailscale_status.stdout | from_json).BackendState in ["Running", "NeedsLogin"]
+      retries: 10
+      delay: 3
+      changed_when: false
+
+    - name: Join the tailnet on first install
+      when: (tailscale_status.stdout | from_json).BackendState == "NeedsLogin"
+      block:
+        - name: Prompt for a single-use auth key
+          ansible.builtin.pause:
+            prompt: Enter a single-use auth key tagged for this host
+            echo: false
+          register: auth_key
+
+        - name: Start services with the auth key
+          no_log: true
+          community.docker.docker_compose_v2:
+            project_src: "{{ service_dir }}"
+          environment:
+            TS_AUTHKEY: "{{ auth_key.user_input | default(undef(hint='An auth key is required on first install'), true) }}"
+
+        - name: Wait for Tailscale to join
+          community.docker.docker_container_exec:
+            container: tailscale
+            command: tailscale status --json
+          register: tailscale_join
+          until: tailscale_join is succeeded and tailscale_join.rc == 0 and (tailscale_join.stdout | from_json).BackendState == "Running"
+          retries: 20
+          delay: 6
+          changed_when: false
+
+      # Runs even when the join fails, so the key never stays in the container
+      always:
+        - name: Restart services without the auth key
+          community.docker.docker_compose_v2:
+            project_src: "{{ service_dir }}"
