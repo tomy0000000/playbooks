@@ -13,4 +13,8 @@ paths:
   - Prompt for the credential only on first install, with `ansible.builtin.pause` and `echo: false`. Don't use `vars_prompt`, which asks on every run.
   - Pass it to the process through the command's `environment:` with `no_log: true`, read in compose as `${VAR:-}`. Never write it to a file.
   - Once the service has used it, recreate the container without it, so it also leaves the container's environment and `docker inspect`.
-- How long-lived secrets (database passwords, API tokens) reach a host isn't decided yet. Ask the user instead of writing them to a file.
+- Long-lived secrets that a systemd unit uses (e.g. the R2 key of a backup job):
+  - Keep the secret in 1Password, vault `Develop`, and read it on the machine running Ansible with the `community.general.onepassword` lookup. Document how to create the item in `service/secrets.md`.
+  - Store it on the host with `systemd-creds encrypt` under `/etc/credstore.encrypted/`, and load it in the unit with `LoadCredentialEncrypted=`. The process reads it from `$CREDENTIALS_DIRECTORY`, so the plaintext never touches the disk.
+  - Decrypt and compare before encrypting, with `no_log: true`. The ciphertext differs on every run, so a blind re-encrypt always reports a change. `utils/backup/tasks.yml` shows the pattern.
+- How long-lived secrets reach a container (e.g. a database password in compose) isn't decided yet. Ask the user instead of writing them to a file.
