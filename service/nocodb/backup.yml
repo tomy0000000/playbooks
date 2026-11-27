@@ -1,0 +1,20 @@
+# https://rclone.org/s3/#cloudflare-r2
+---
+- name: Playbook for backing up NocoDB to R2 and the backup disk
+  hosts: all
+  gather_facts: true
+  vars:
+    backup_name: nocodb
+    backup_bucket: tomy-backup-nocodb
+    backup_mount: /mnt/backup
+    backup_credential: "/etc/credstore.encrypted/{{ backup_name }}-backup.rclone.conf"
+    backup_paths:
+      - "{{ ansible_user_dir }}/Developing/nocodb"
+      - /var/lib/docker/volumes/nocodb_nc_data/_data
+    # Archive a pg_dump instead of the live Postgres data directory
+    backup_dump: docker exec nocodb-db pg_dump -U postgres -Fc root_db > "$dump_dir/root_db.dump"
+
+  tasks:
+    - name: Set up the NocoDB backup
+      become: true
+      ansible.builtin.import_tasks: ../../utils/backup/tasks.yml
