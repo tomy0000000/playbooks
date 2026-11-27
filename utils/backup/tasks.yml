@@ -1,0 +1,102 @@
+# Expects backup_name, backup_bucket and backup_paths, optionally backup_dump and backup_schedule
+---
+- name: Install rclone
+  ansible.builtin.apt:
+    name: rclone
+    update_cache: true
+    cache_valid_time: 3600
+
+# The backup disk on every host is labelled <host>-backup
+- name: Mount the backup disk
+  ansible.posix.mount:
+    path: "{{ backup_mount }}"
+    src: "LABEL={{ inventory_hostname }}-backup"
+    fstype: ext4
+    opts: defaults,nofail
+    state: mounted
+
+- name: Create the credential store
+  ansible.builtin.file:
+    path: /etc/credstore.encrypted
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+# Re-encrypting gives new ciphertext every time, so compare the decrypted value first
+- name: Store the R2 key as an encrypted systemd credential
+  no_log: true
+  vars:
+    backup_op_item: "{{ inventory_hostname }}-cloudflare-{{ backup_name }}_backup"
+    backup_rclone_conf: |-
+      [r2]
+      type = s3
+      provider = Cloudflare
+      access_key_id = {{ lookup('community.general.onepassword', backup_op_item, field='username', vault='Develop') }}
+      secret_access_key = {{ lookup('community.general.onepassword', backup_op_item, field='credential', vault='Develop') }}
+      endpoint = https://{{ lookup('community.general.onepassword', backup_op_item, field='hostname', vault='Develop') }}
+      no_check_bucket = true
+      no_head = true
+  block:
+    - name: Read the stored R2 key
+      ansible.builtin.command:
+        cmd: systemd-creds --name=rclone.conf decrypt {{ backup_credential }} -
+      register: backup_stored
+      changed_when: false
+      failed_when: false
+
+    - name: Encrypt the R2 key
+      when: backup_stored.rc != 0 or backup_stored.stdout != backup_rclone_conf
+      ansible.builtin.command:
+        cmd: systemd-creds --name=rclone.conf encrypt - {{ backup_credential }}
+        stdin: "{{ backup_rclone_conf }}"
+      changed_when: true
+
+- name: Install the backup script
+  ansible.builtin.template:
+    src: backup.sh.j2
+    dest: "/usr/local/sbin/{{ backup_name }}-backup"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install the backup service
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ backup_name }}-backup.service"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Back up {{ backup_name }} to R2 and the backup disk
+      Wants=network-online.target
+      After=network-online.target docker.service
+
+      [Service]
+      Type=oneshot
+      LoadCredentialEncrypted=rclone.conf:{{ backup_credential }}
+      ExecStart=/usr/local/sbin/{{ backup_name }}-backup
+
+- name: Install the backup timer
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ backup_name }}-backup.timer"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Back up {{ backup_name }} nightly
+
+      [Timer]
+      OnCalendar={{ backup_schedule | default('*-*-* 04:00:00') }}
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Enable the backup timer
+  ansible.builtin.systemd_service:
+    name: "{{ backup_name }}-backup.timer"
+    enabled: true
+    state: started
+    daemon_reload: true
