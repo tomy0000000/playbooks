@@ -86,6 +86,5 @@
       vars:
         title: WireGuard Easy
         url: https://{{ domain }}
-        username: "{{ username }}"
 
     # TODO: Configure Nginx Proxy Manager
