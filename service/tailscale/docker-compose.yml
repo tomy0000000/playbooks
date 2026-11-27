@@ -4,9 +4,9 @@ services:
     image: tailscale/tailscale:v1.104
     environment:
       TS_AUTH_ONCE: "true"
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
       TS_HOSTNAME: ${TS_HOSTNAME}
       TS_STATE_DIR: /var/lib/tailscale
-    env_file: tailscale.env
     restart: always
     volumes:
       - state:/var/lib/tailscale
